@@ -36,7 +36,7 @@ public class OrderController {
 	}
 	
 	@GetMapping("/{orderNumber}")
-    public Order getOrderInfo(@PathVariable Integer orderNumber) {
+    public Order getOrderInfo(@PathVariable("orderNumber") Integer orderNumber) {
         // OrderService에 getOrder 메서드가 필요할 수 있습니다.
         // 만약 Service에 없다면 Repository에서 findByOrderNumber 등을 호출해야 합니다.
         // 여기서는 가장 간단하게 Service를 통해 가져온다고 가정합니다.
@@ -45,7 +45,7 @@ public class OrderController {
 	
 	//주문 상태 변경
 	@PutMapping("/{orderNumber}/status")
-	public Order updateStatus(@PathVariable Integer orderNumber, @RequestParam String status) throws Exception {
+	public Order updateStatus(@PathVariable ("orderNumber") Integer orderNumber, @RequestParam ("status") String status) throws Exception {
 		return orderService.updateOrderStatus(orderNumber, status);
 	}
 

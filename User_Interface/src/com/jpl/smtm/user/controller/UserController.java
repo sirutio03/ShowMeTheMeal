@@ -100,39 +100,57 @@ public class UserController implements ActionListener, Runnable {
 
     // ★ [추가됨] 내 주문 상태만 콕 집어서 가져오는 새 메서드
     private void checkMyOrderStatus(String myNo) {
-        try {
-            // 예: http://localhost:8080/api/orders/105
-            URL url = new URL(CHECK_URL + myNo);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("Accept", "application/json");
+    	new Thread(() -> { // UI 멈춤 방지를 위해 스레드 사용
+            try {
+                URL url = new URL(CHECK_URL + myNo);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Accept", "application/json");
 
-            if (conn.getResponseCode() == 200) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while((line = in.readLine()) != null) sb.append(line);
-                
-                // 가져온 JSON 파싱: {"orderNumber":105, "orderStatus":"COMPLETED", ...}
-                String json = sb.toString();
-                String status = extractValue(json, "\"orderStatus\":");
-                
-                if (status != null) {
-                    String korStatus = convertStatusToKorean(status);
+                int code = conn.getResponseCode();
+                // ★ 콘솔 로그 추가: 서버가 뭐라고 하는지 확인
+                System.out.println("내 주문 조회(" + myNo + ") 응답 코드: " + code);
+
+                if (code == 200) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while((line = in.readLine()) != null) sb.append(line);
                     
-                    // 상태가 변했으면 화면 갱신 (예: 조리 중 -> 조리 완료)
-                    if (!model.getUserOrderStatus().equals(korStatus)) {
-                        model.setUserOrderStatus(korStatus);
-                        SwingUtilities.invokeLater(() -> {
-                            view.updateStatusDisplay(myNo, korStatus);
-                        });
+                    String json = sb.toString();
+                    System.out.println("서버에서 받은 데이터: " + json); // ★ 데이터 확인용 로그
+
+                    // 데이터가 비어있으면 (DB에 번호가 없음)
+                    if (json == null || json.trim().isEmpty()) {
+                         SwingUtilities.invokeLater(() -> view.updateStatusDisplay(myNo, "주문 정보 없음"));
+                         return;
                     }
+
+                    String status = extractValue(json, "\"orderStatus\":");
+                    
+                    if (status != null) {
+                        String korStatus = convertStatusToKorean(status);
+                        if (!model.getUserOrderStatus().equals(korStatus)) {
+                            model.setUserOrderStatus(korStatus);
+                            SwingUtilities.invokeLater(() -> {
+                                view.updateStatusDisplay(myNo, korStatus);
+                            });
+                        }
+                    } else {
+                        // JSON은 왔는데 status가 없는 경우
+                         SwingUtilities.invokeLater(() -> view.updateStatusDisplay(myNo, "상태 알 수 없음"));
+                    }
+                } else if (code == 404 || code == 500) {
+                     // 서버 에러나 못 찾은 경우
+                     SwingUtilities.invokeLater(() -> view.updateStatusDisplay(myNo, "주문 번호 오류"));
                 }
+            } catch (Exception e) {
+                System.out.println("통신 에러: " + e.getMessage());
+                // e.printStackTrace(); 
             }
-        } catch (Exception e) {
-            // 내 번호가 아직 DB에 없거나 에러난 경우 조용히 넘어감
-        }
+        }).start();
     }
+    
 
     // 서버에서 대기열 목록 가져오기
     private void getWaitingListFromServer() {

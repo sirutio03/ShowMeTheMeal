@@ -19,7 +19,7 @@ public class OrderService {
 	@Autowired
 	private OrderRepository orderRepository;
 	
-	@Autowired
+	@Autowired(required = false)
 	private ChatService chatService;
 	
 	@Transactional
@@ -28,10 +28,18 @@ public class OrderService {
 		return orderRepository.save(order);
 	}
 	
+	//내 주문 확인
 	public Order getOrder(Integer orderNumber) {
-	     return orderRepository.findByOrderNumber(orderNumber).orElse(null); 
+		List<Order> orders = orderRepository.findByOrderNumber(orderNumber); 
+		
+		if (orders == null || orders.isEmpty()) {
+			return null;
+		}
+		
+		return orders.get(orders.size() - 1);
 	 }
 	
+	//상태 변경
 	@Transactional
 	public Order updateOrderStatus(Integer orderNumber, String statusStr) throws Exception {
         OrderStatus status;
@@ -41,24 +49,29 @@ public class OrderService {
 			throw new IllegalArgumentException("유효하지 않음");
 		}
 		
-		Order order = orderRepository.findByOrderNumber(orderNumber)
-				.orElseThrow(() -> new RuntimeException("주문없음"));
-
-        //매장 주문은 "배달 중" 상태 없음
-        if (order.getOrderType()  == OrderType.STORE && status == OrderStatus.DELIVERING) {
-            throw new IllegalArgumentException("매장 주문은 '배달 중' 상태가 될 수 없습니다.");
-        }
+		//리스트로 조회
+		List<Order> orders = orderRepository.findByOrderNumber(orderNumber);
+		if (orders == null || orders.isEmpty()) {
+			throw new RuntimeException("주문 번호를 찾을 수 없음: " + orderNumber);
+		}
+		
+		Order order = orders.get(orders.size() - 1); //최신 주문 선택
+		
+		if (order.getOrderType() == OrderType.STORE && status == OrderStatus.DELIVERING) {
+			throw new IllegalArgumentException("매장 주문은 배달 불가");
+		}
 
         order.setOrderStatus(status);
-        orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
 
         // 대기열 조회
         List<Integer> waitingNumbers = orderRepository.findByOrderStatusInOrderByRegDateAsc(
                 	Arrays.asList(OrderStatus.WAITING, OrderStatus.COMPLETED, OrderStatus.DELIVERING))
         			.stream().map(Order::getOrderNumber).collect(Collectors.toList());
 
-        // ChatService를 통해 실시간 알림 발송
-        chatService.notifyOrderUpdate(order, waitingNumbers);
+        if (chatService != null) {
+			chatService.notifyOrderUpdate(savedOrder, waitingNumbers);
+		}
 
         return order;
     }
