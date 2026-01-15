@@ -2,27 +2,25 @@ package com.jpl.smtm.dto;
 
 import java.util.List;
 
+import com.jpl.smtm.constant.OrderStatus;
+import com.jpl.smtm.constant.OrderType;
+
 public class ChatMessage {
 	
 	private String type;
 	private Integer orderNumber;
-	private String orderType;
-	private String message;
+	private OrderType orderType;
+	private OrderStatus orderStatus;
 	private List<Integer> waitingList;
 	
 	public ChatMessage() {}
 
-	public ChatMessage(String type, Integer orderNumber, String orderType, String message, List<Integer> waitingList) {
+	public ChatMessage(String type, Integer orderNumber, OrderType orderType, OrderStatus orderStatus, List<Integer> waitingList) {
 		this.type = type;
 		this.orderNumber = orderNumber;
 		this.orderType = orderType;
-		this.message = message;
+		this.orderStatus = orderStatus;
 		this.waitingList = waitingList;
-	}
-
-	public ChatMessage(String type, String message) {
-		this.type = type;
-		this.message = message;
 	}
 
 	public String getType() {
@@ -33,12 +31,12 @@ public class ChatMessage {
 		return orderNumber;
 	}
 
-	public String getOrderType() {
+	public OrderType getOrderType() {
 		return orderType;
 	}
 
-	public String getMessage() {
-		return message;
+	public OrderStatus getOrderStatus() {
+		return orderStatus;
 	}
 
 	public List<Integer> getWaitingList() {
@@ -53,18 +51,18 @@ public class ChatMessage {
 		this.orderNumber = orderNumber;
 	}
 
-	public void setOrderType(String orderType) {
+	public void setOrderType(OrderType orderType) {
 		this.orderType = orderType;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public void setOrderStatus(OrderStatus orderStatus) {
+		this.orderStatus = orderStatus;
 	}
 
 	public void setWaitingList(List<Integer> waitingList) {
 		this.waitingList = waitingList;
 	}
-	
+
 	
 	
 	

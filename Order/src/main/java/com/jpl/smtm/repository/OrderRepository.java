@@ -5,12 +5,13 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.jpl.smtm.constant.OrderStatus;
 import com.jpl.smtm.entity.Order;
 
 
 public interface OrderRepository extends JpaRepository<Order, Integer>{
 	
-	List<Order> findByOrderStatusInOrderByRegDateAsc(List<String> statuses);
+	List<Order> findByOrderStatusInOrderByRegDateAsc(List<OrderStatus> statuses);
 	Optional<Order> findByOrderNumber(Integer orderNumber);
 
 }

@@ -12,6 +12,7 @@ import com.jpl.smtm.handler.ChatHandler;
 
 @Service
 public class ChatService {
+	
     @Autowired 
     private ChatHandler chatHandler;
     
@@ -19,22 +20,16 @@ public class ChatService {
 
     // 주문 상태 변경 알림 전송 (가운데 UI + 왼쪽 UI 갱신용)
     public void notifyOrderUpdate(Order order, List<Integer> waitingList) throws Exception {
-        ChatMessage response = new ChatMessage(
-            "ORDER_UPDATE", 
-            order.getOrderNumber(), 
-            order.getOrderType(), 
-            order.getOrderStatus(), 
-            waitingList
-        );
+       ChatMessage response = new ChatMessage(
+    		   "ORDER_UPDATE",
+    		   order.getOrderNumber(),
+    		   order.getOrderType(),
+    		   order.getOrderStatus(),
+    		   waitingList
+    		   );
         
         String json = objectMapper.writeValueAsString(response);
         chatHandler.broadcastMessage(json);
     }
 
-    // 일반 채팅 전송 (오른쪽 UI용)
-    public void sendDirectChat(String sender, String message) throws Exception {
-        ChatMessage chat = new ChatMessage("CHAT", message); // 단순 채팅용 생성자 사용
-        // ... 필요한 세팅 후 전송
-        chatHandler.broadcastMessage(objectMapper.writeValueAsString(chat));
-    }
 }
