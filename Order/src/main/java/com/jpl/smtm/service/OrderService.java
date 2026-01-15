@@ -28,6 +28,10 @@ public class OrderService {
 		return orderRepository.save(order);
 	}
 	
+	public Order getOrder(Integer orderNumber) {
+	     return orderRepository.findByOrderNumber(orderNumber).orElse(null); 
+	 }
+	
 	@Transactional
 	public Order updateOrderStatus(Integer orderNumber, String statusStr) throws Exception {
         OrderStatus status;
