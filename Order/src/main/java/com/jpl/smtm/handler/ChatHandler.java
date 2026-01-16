@@ -26,6 +26,7 @@ public class ChatHandler extends TextWebSocketHandler{
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception{
 		String payload = message.getPayload();
 		System.out.println("받은 메세지: " + payload);
+		broadcastMessage(payload);
 	}
 	
 	//broadcastMessage를 handleTextMessage와 분리함
