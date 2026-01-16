@@ -34,7 +34,8 @@ public class OrderController {
 	public List<Order> getWaitingQueue(){
 		return orderService.getInitialQueue();
 	}
-	
+
+	//내 주문 정보 조회
 	@GetMapping("/{orderNumber}")
     public Order getOrderInfo(@PathVariable("orderNumber") Integer orderNumber) {
         return orderService.getOrder(orderNumber);
