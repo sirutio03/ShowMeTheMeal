@@ -13,15 +13,17 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @Component
 public class ChatHandler extends TextWebSocketHandler{
 	
-	//Set 사용으로 수정
+	//List->Set으로 수정: 중복 저장 방지
 	private final Set<WebSocketSession> sessions = Collections.synchronizedSet(new HashSet<>());
 	
+	//클라이언트와 웹소켓 연결 시
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		sessions.add(session);
 		System.out.println("새로운 연결: " + session.getId());
 	}
 	
+	//클라이언트에게 메시지 도착 시
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception{
 		String payload = message.getPayload();
@@ -38,6 +40,7 @@ public class ChatHandler extends TextWebSocketHandler{
 		}
 	}
 	
+	//클라이언트와 연결이 끊어졌을 때
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
 		sessions.remove(session);

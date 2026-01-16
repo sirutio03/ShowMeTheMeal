@@ -29,21 +29,21 @@ public class OrderController {
 		return orderService.createOrder(order);
 	}
 	
-	//대기열 조회
+	//전체 대기열 조회
 	@GetMapping("/waiting")
 	public List<Order> getWaitingQueue(){
 		return orderService.getInitialQueue();
 	}
 	
+	//내 주문번호 조회
+	//@PathVariable에 매핑할 이름 명시적 지정
 	@GetMapping("/{orderNumber}")
     public Order getOrderInfo(@PathVariable("orderNumber") Integer orderNumber) {
-        // OrderService에 getOrder 메서드가 필요할 수 있습니다.
-        // 만약 Service에 없다면 Repository에서 findByOrderNumber 등을 호출해야 합니다.
-        // 여기서는 가장 간단하게 Service를 통해 가져온다고 가정합니다.
         return orderService.getOrder(orderNumber);
     }
 	
-	//주문 상태 변경
+	//주문 상태 변경 시
+	//@PathVariable에 매핑할 이름 명시적 지정
 	@PutMapping("/{orderNumber}/status")
 	public Order updateStatus(@PathVariable ("orderNumber") Integer orderNumber, @RequestParam ("status") String status) throws Exception {
 		return orderService.updateOrderStatus(orderNumber, status);
